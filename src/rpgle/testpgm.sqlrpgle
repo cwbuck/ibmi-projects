@@ -41,10 +41,13 @@ DoW Not EndProgram;
     EndProgram = *On;
   EndIf;
 
-  If 2 = 2;
+  If (2 = 2);
     EndProgram = *On;
   EndIf;
-
+ 
+  If (3 = 3);
+    EndProgram = *On;
+  EndIf;
   
 
 EndDo;
