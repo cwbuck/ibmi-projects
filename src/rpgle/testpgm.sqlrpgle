@@ -48,6 +48,10 @@ DoW Not EndProgram;
   If (3 = 3);
     EndProgram = *On;
   EndIf;
+
+  If (4 = 4);
+    EndProgram = *On;
+  EndIf;
   
 
 EndDo;
