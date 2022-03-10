@@ -37,8 +37,15 @@ Exec SQL
 
 DoW Not EndProgram;
   
-  1=1;
-  EndProgram = *On;
+  If (1 = 1);
+    EndProgram = *On;
+  EndIf;
+
+  If 2 = 2;
+    EndProgram = *On;
+  EndIf;
+
+  
 
 EndDo;
 
