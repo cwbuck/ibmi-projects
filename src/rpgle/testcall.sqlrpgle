@@ -30,6 +30,7 @@ Dcl-S @SQLCod  Like(SQLCOD) Dim(2);
 Dcl-S Schema   VarChar(10);
 
 
+
 //==============================================================================
 // G L O B A L  C O N S T A N T S
 
