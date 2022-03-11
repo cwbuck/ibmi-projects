@@ -8,6 +8,10 @@ Ctl-Opt DftActGrp(*No) Option(*SrcStmt : *NoDebugIO);
 //==============================================================================
 // D A T A  S T R U C T U R E S
 
+Dcl-Ds LockedByData Qualified Inz;
+  
+End-Ds;
+
 
 //==============================================================================
 // G L O B A L  V A R I A B L E S
@@ -22,6 +26,16 @@ Dcl-S EndProgram Ind Inz(*Off);
 //==============================================================================
 // E X T E R N A L  P R O C E D U R E S
 
+// Parameters
+Dcl-Pi GNR8035;
+  @Schema       VarChar(10);
+  @Table        VarChar(10);
+  @RRN          Zoned(15:0);
+  @IsLocked     Ind;
+  @LockedByData ;
+  @SQLCod       Like(SQLCOD);
+End-Pi;
+
 // Setup SQL Environment
 Exec SQL
   Set Option
@@ -35,26 +49,7 @@ Exec SQL
 //==============================================================================
 // M A I N
 
-DoW Not EndProgram;
-  
-  If (1 = 1);
-    EndProgram = *On;
-  EndIf;
 
-  If (2 = 2);
-    EndProgram = *On;
-  EndIf;
- 
-  If (3 = 3);
-    EndProgram = *On;
-  EndIf;
-
-  If (4 = 4);
-    EndProgram = *On;
-  EndIf;
-  
-
-EndDo;
 
 
 
