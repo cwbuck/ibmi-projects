@@ -77,7 +77,7 @@ Exec SQL
     Where Table_Schema = :@Schema And Table_Name = :@Table 
           And Relative_Record_Number = :@RRN
     Fetch First Row Only;
-  // Capture SQLCOD to   
+  // Move SQLCOD to array to return to caller 
   @SQLCod(1) = SQLCOD;          
 
   // Process based on SQLCOD result
@@ -100,6 +100,7 @@ Exec SQL
           From Table(QSYS2.Job_Info( Job_Status_Filter => '*ACTIVE'
                                    , Job_User_Filter   => '*ALL' ))
           Where Job_Name = :JobName;
+        // Move SQLCOD to array to return to caller
         @SQLCod(2) = SQLCOD;
 
     // SQL encountered an error. Error will be returned to caller via @SQLCod.
