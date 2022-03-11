@@ -38,9 +38,9 @@ Dcl-S @SQLCod  Like(SQLCOD) Dim(2);
 
 // Check for record lock and return lock info
 Dcl-Pr GNR8035 ExtPgm('GNR8035');
-  Schema       VarChar(10);
-  Table        VarChar(10);
-  RRN          Zoned(15:0);
+  Schema       VarChar(10) Const;
+  Table        VarChar(10) Const;
+  RRN          Zoned(15:0) Const;
   IsLocked     Ind;
   LockedByData LikeDs(LockedByData);
   SQLCod       Like(SQLCOD) Dim(2);
