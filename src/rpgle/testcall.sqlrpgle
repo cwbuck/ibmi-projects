@@ -8,19 +8,6 @@ Ctl-Opt DftActGrp(*No) Option(*SrcStmt : *NoDebugIO);
 //==============================================================================
 // D A T A  S T R U C T U R E S
 
-Dcl-Ds LockedByData Qualified Inz;
-  JobName               VarChar(10);
-  JobUser               VarChar(10);
-  JobNumber             Varchar(6);
-  JobStatus             VarChar(6);
-  JobType               VarChar(28);
-  JobSubsystem          VarChar(10);
-  JobDate               Date(*ISO);
-  JobDescriptionLibrary VarChar(10); 
-  JObDescription        VarChar(10);
-  JobEnteredSystemTime  Timestamp;
-End-Ds;
-
 
 //==============================================================================
 // G L O B A L  V A R I A B L E S
@@ -39,14 +26,7 @@ Dcl-S Schema   VarChar(10);
 // E X T E R N A L  P R O C E D U R E S
 
 // Check for record lock and return lock info
-Dcl-Pr GNR8035 ExtPgm('GNR8035');
-  Schema       VarChar(10);
-  Table        VarChar(10) Const;
-  RRN          Zoned(15:0) Const;
-  IsLocked     Ind;
-  LockedByData LikeDs(LockedByData);
-  SQLCod       Like(SQLCOD) Dim(2);
-End-Pr;
+/Include QCPYLESRC,GNR8035_PR
 
 // Setup SQL Environment
 Exec SQL
