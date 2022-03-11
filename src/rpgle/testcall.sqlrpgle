@@ -27,6 +27,7 @@ End-Ds;
 
 Dcl-S IsLocked Ind;
 Dcl-S @SQLCod  Like(SQLCOD) Dim(2);
+Dcl-S Schema   VarChar(10);
 
 
 //==============================================================================
@@ -38,7 +39,7 @@ Dcl-S @SQLCod  Like(SQLCOD) Dim(2);
 
 // Check for record lock and return lock info
 Dcl-Pr GNR8035 ExtPgm('GNR8035');
-  Schema       VarChar(10) Const;
+  Schema       VarChar(10);
   Table        VarChar(10) Const;
   RRN          Zoned(15:0) Const;
   IsLocked     Ind;
@@ -59,7 +60,8 @@ Exec SQL
 //==============================================================================
 // M A I N
 
-GNR8035 ('P3783301':'VRMRATEQ':90:IsLocked:LockedByData:@SQLCod);
+Schema = *Blank;
+GNR8035 (Schema:'VRMRATEQ':90:IsLocked:LockedByData:@SQLCod);
 
 
 //------------------------------------------------------------------------------
