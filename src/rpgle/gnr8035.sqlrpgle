@@ -25,7 +25,7 @@ Dcl-Ds LockedByData Qualified Inz;
   JobDate               Date(*ISO);
   JobDescriptionLibrary VarChar(10); 
   JObDescription        VarChar(10);
-  JobEnteredSystemTime  Timestamp();
+  JobEnteredSystemTime  Timestamp;
 End-Ds;
 
 
@@ -48,10 +48,10 @@ DCl-S JobName    VarChar(28);
 
 // Parameters
 Dcl-Pi GNR8035;
-  @Schema       VarChar(10);
-  @Table        VarChar(10);
-  @RRN          Zoned(15:0);
-  @IsLocked     Ind Inz(*Off);
+  @Schema       VarChar(10) Const;
+  @Table        VarChar(10) Const;
+  @RRN          Zoned(15:0) Const;
+  @IsLocked     Ind;
   @LockedByData LikeDs(LockedByData);
   @SQLCod       Like(SQLCOD) Dim(2);
 End-Pi;
@@ -93,8 +93,8 @@ Exec SQL
       // Get job info for the locking job
       Exec SQL
         Select Job_Name_Short, Job_User, Job_Number, Job_Status
-               , Job_Type_Enhanced, Job_Subsystem, Job_Date,
-               , Job_Description_Library, Job_Description,
+               , Job_Type_Enhanced, Job_Subsystem, Job_Date
+               , Job_Description_Library, Job_Description
                , Job_Entered_System_Time
           Into :@LockedByData
           From Table(QSYS2.Job_Info( Job_Status_Filter => '*ACTIVE'
