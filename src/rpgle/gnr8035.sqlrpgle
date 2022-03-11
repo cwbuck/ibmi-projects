@@ -48,7 +48,7 @@ DCl-S JobName    VarChar(28);
 
 // Parameters
 Dcl-Pi GNR8035;
-  @Schema       VarChar(10) Const;
+  @Schema       VarChar(10);
   @Table        VarChar(10) Const;
   @RRN          Zoned(15:0) Const;
   @IsLocked     Ind;
@@ -68,6 +68,11 @@ Exec SQL
 
 //==============================================================================
 // M A I N
+
+// If no Schema specified, get from *LIBL
+If @Schema = *Blank;
+  @Schema = Get_ObjLib(@Table);
+EndIf;
 
 // Get job name for record lock
 Exec SQL
@@ -118,4 +123,23 @@ Return;
 //==============================================================================
 // S U B P R O C E D U R E S
 
+//------------------------------------------------------------------------------
+//   Procedure: Get_ObjLib
+// Description: Get the first library in *LIBL for the specified object name
 
+Dcl-Proc Get_ObjLib;
+  
+  Dcl-Pi *n VarChar(10);
+    @ObjName VarChar(10) Const;
+  End-Pi;
+
+  Dcl-S @ObjLib VarChar(10);
+
+  Exec SQL
+    Select ObjLib
+      Into :@ObjLib
+      From Table(QSYS2.Object_Statistics('*LIBL', '*ALL', :@ObjName));
+
+  Return @ObjLib;    
+      
+End-Proc;
