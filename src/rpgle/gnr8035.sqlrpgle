@@ -9,18 +9,7 @@
 //==============================================================================
 // C O M P I L E R  O P T I O N S
 
-Ctl-Opt DftActGrp(*No) Option(*SrcStmt : *NoDebugIO);
-
-
-//==============================================================================
-// D A T A  S T R U C T U R E S
-
-
-//==============================================================================
-// G L O B A L  V A R I A B L E S
-
-Dcl-S EndProgram Ind Inz(*Off);
-DCl-S JobName    VarChar(28);
+Ctl-Opt NoMain DftActGrp(*No) Option(*SrcStmt:*NoDebugIO);
 
 
 //==============================================================================
@@ -33,18 +22,8 @@ DCl-S JobName    VarChar(28);
 //==============================================================================
 // P R O C E D U R A L  D E F I N I T I O N S
 
-// Prototype
+// Prototypes
 /Include QCPYLESRC,GNR8035_PR
-
-// Parameters
-Dcl-Pi GNR8035;
-  @Schema       VarChar(10);
-  @Table        VarChar(10) Const;
-  @RRN          Zoned(15:0) Const;
-  @IsLocked     Ind;
-  @LockedByData LikeDs(LockedByData);
-  @SQLCod       Like(SQLCOD) Dim(2);
-End-Pi;
 
 // Setup SQL Environment
 Exec SQL
@@ -57,70 +36,59 @@ Exec SQL
 
 
 //==============================================================================
-// M A I N
-
-// If no Schema specified, get from *LIBL
-If @Schema = *Blank;
-  @Schema = Get_ObjLib(@Table);
-EndIf;
-
-// Get job name for record lock
-Exec SQL
-  Select Job_Name 
-    Into :JobName
-    From QSYS2.Record_Lock_Info
-    Where Table_Schema = :@Schema And Table_Name = :@Table 
-          And Relative_Record_Number = :@RRN
-    Fetch First Row Only;
-  // Move SQLCOD to array to return to caller 
-  @SQLCod(1) = SQLCOD;          
-
-  // Process based on SQLCOD result
-  Select;
-
-    // No records found. Record is NOT locked.
-    When SQLCOD = 100;
-      @IsLocked = False;
-
-    // Record found & no errors. Record is locked.
-    When SQLCOD = 0;
-      @IsLocked = True;
-      // Get job info for the locking job
-      Exec SQL
-        Select Job_Name_Short, Job_User, Job_Number, Job_Status
-               , Job_Type_Enhanced, Job_Subsystem, Job_Date
-               , Job_Description_Library, Job_Description
-               , Job_Entered_System_Time
-          Into :@LockedByData
-          From Table(QSYS2.Job_Info( Job_Status_Filter => '*ACTIVE'
-                                   , Job_User_Filter   => '*ALL' ))
-          Where Job_Name = :JobName;
-        // Move SQLCOD to array to return to caller
-        @SQLCod(2) = SQLCOD;
-
-    // SQL encountered an error. Error will be returned to caller via @SQLCod.
-    Other;
-
-  EndSl;
-              
+// P R O C E D U R E S
 
 //------------------------------------------------------------------------------
-// End Program
-*Inlr = *On;
-Return;
+//   Procedure: Is_RcdLocked()
+// Description: Check if record is locked and get the locking job name
 
+Dcl-Proc Is_RcdLocked() Export;
 
-//==============================================================================
-// S U B P R O C E D U R E S
+  Dcl-Pi *n Ind;
+    @Schema         VarChar(10);        // Both
+    @Table          VarChar(10) Const;  // In
+    @RRN            Zoned(15:0) Const;  // In
+    @LockingJobName VarChar(28);        // Out
+    @SQLCOD         Like(SQLCOD);       // Out
+  End-Pi;
+
+  Dcl-S Schema
+
+  // If caller does not specify a schema or defers to '*LIBL', override with
+  // first library containing table on caller's *LIBL
+  If @Schema In %List(*Blank:'*LIBL');
+    @Schema = Get_ObjLib(@Table:@SQLCOD);
+  EndIf;
+
+  // Check for record lock and get job name
+  Exec SQL
+    Select Job_Name 
+      Into :JobName
+      From QSYS2.Record_Lock_Info
+      Where Table_Schema = :@Schema And Table_Name = :@Table 
+            And Relative_Record_Number = :@RRN
+      Fetch First Row Only;
+  // Return SQL Code
+  @SQLCOD = SQLCOD;  
+
+  If SQLCOD = 0;
+    Return True;
+  Else;
+    Return False;
+  EndIf;
+
+End-Proc;
+
 
 //------------------------------------------------------------------------------
 //   Procedure: Get_ObjLib
 // Description: Get the first library in *LIBL for the specified object name
 
-Dcl-Proc Get_ObjLib;
+Dcl-Proc Get_ObjLib Export;
   
   Dcl-Pi *n VarChar(10);
-    @ObjName VarChar(10) Const;
+    @ObjName VarChar(10) Const;  // In
+    @SQLCOD  Like(SQLCOD);       // Out
   End-Pi;
 
   Dcl-S @ObjLib VarChar(10);
@@ -129,7 +97,37 @@ Dcl-Proc Get_ObjLib;
     Select ObjLib
       Into :@ObjLib
       From Table(QSYS2.Object_Statistics('*LIBL', '*ALL', :@ObjName));
+  @SQLCOD = SQLCOD;
 
   Return @ObjLib;    
       
 End-Proc;
+
+
+//------------------------------------------------------------------------------
+//   Procedure: Get_ActiveJobInfo()
+// Description: Get job info data for a specific job name
+
+Dcl-Proc Get_ActiveJobInfo() Export;
+
+  Dcl-Pi *n;
+    @JobName VarChar(28);      // In
+    @JobInfo LikeDS(JobInfo);  // Out
+    @SQLCOD  Like(SQLCOD)      // Out
+  End-Pi;
+
+  Exec SQL
+    Select Job_Name_Short, Job_User, Job_Number, Job_Status
+         , Job_Type_Enhanced, Job_Subsystem, Job_Date
+         , Job_Description_Library, Job_Description
+         , Job_Entered_System_Time
+      Into :@JobInfo
+      From Table(QSYS2.Job_Info( Job_Status_Filter => '*ACTIVE'
+                               , Job_User_Filter   => '*ALL' ))
+      Where Job_Name = :@JobName;
+    // Return SQL Code
+    @SQLCOD = SQLCOD;
+
+End-Proc;
+
+

@@ -28,15 +28,15 @@ End-Pr;
 //==============================================================================
 // D A T A  S T R U C T U R E S
 
-Dcl-Ds LockedByData Qualified Inz;
-  JobName               VarChar(10);
-  JobUser               VarChar(10);
-  JobNumber             Varchar(6);
-  JobStatus             VarChar(6);
-  JobType               VarChar(28);
-  JobSubsystem          VarChar(10);
-  JobDate               Date(*ISO);
+Dcl-Ds JobInfo Qualified Inz;
+  ShortName             VarChar(10);
+  User                  VarChar(10);
+  Number                Varchar(6);
+  Status                VarChar(6);
+  Type                  VarChar(28);
+  Subsystem             VarChar(10);
+  Date                  Date(*ISO);
   JobDescriptionLibrary VarChar(10); 
-  JObDescription        VarChar(10);
-  JobEnteredSystemTime  Timestamp;
+  JobDescription        VarChar(10);
+  EnteredSystemTime     Timestamp;
 End-Ds;
