@@ -2,7 +2,7 @@
 //==============================================================================
 // C O M P I L E R  O P T I O N S
 
-Ctl-Opt DftActGrp(*No) Option(*SrcStmt : *NoDebugIO);
+Ctl-Opt DftActGrp(*No) Option(*SrcStmt : *NoDebugIO) BndDir('CB_BNDDIR');
 
 
 //==============================================================================
@@ -12,14 +12,8 @@ Ctl-Opt DftActGrp(*No) Option(*SrcStmt : *NoDebugIO);
 //==============================================================================
 // G L O B A L  V A R I A B L E S
 
-Dcl-S IsLocked Ind;
-Dcl-S @SQLCod  Like(SQLCOD) Dim(2);
-Dcl-S Schema   VarChar(10);
-
-
-
-//==============================================================================
-// G L O B A L  C O N S T A N T S
+Dcl-S Schema      VarChar(10);
+Dcl-S LockedByJob VarChar(28);
 
 
 //==============================================================================
@@ -42,7 +36,9 @@ Exec SQL
 // M A I N
 
 Schema = *Blank;
-GNR8035 (Schema:'VRMRATEQ':90:IsLocked:LockedByData:@SQLCod);
+If Is_RcdLocked(Schema:'VRMRATEQ':89:LockedByJob:SQLCOD);
+  Get_ActiveJobInfo(LockedByJob:JobInfo:SQLCOD);
+EndIf;
 
 
 //------------------------------------------------------------------------------
@@ -50,7 +46,4 @@ GNR8035 (Schema:'VRMRATEQ':90:IsLocked:LockedByData:@SQLCod);
 *Inlr = *On;
 Return;
 
-
-//==============================================================================
-// S U B P R O C E D U R E S
 
