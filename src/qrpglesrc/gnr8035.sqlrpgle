@@ -9,7 +9,7 @@
 //==============================================================================
 // C O M P I L E R  O P T I O N S
 
-Ctl-Opt NoMain DftActGrp(*No) Option(*SrcStmt:*NoDebugIO);
+Ctl-Opt NoMain;
 
 
 //==============================================================================
@@ -42,7 +42,7 @@ Exec SQL
 //   Procedure: Is_RcdLocked()
 // Description: Check if record is locked and get the locking job name
 
-Dcl-Proc Is_RcdLocked() Export;
+Dcl-Proc Is_RcdLocked Export;
 
   Dcl-Pi *n Ind;
     @Schema         VarChar(10);        // Both
@@ -52,18 +52,16 @@ Dcl-Proc Is_RcdLocked() Export;
     @SQLCOD         Like(SQLCOD);       // Out
   End-Pi;
 
-  Dcl-S Schema
-
   // If caller does not specify a schema or defers to '*LIBL', override with
   // first library containing table on caller's *LIBL
-  If @Schema In %List(*Blank:'*LIBL');
+  If @Schema In %List('':'*LIBL');
     @Schema = Get_ObjLib(@Table:@SQLCOD);
   EndIf;
 
   // Check for record lock and get job name
   Exec SQL
     Select Job_Name 
-      Into :JobName
+      Into :@LockingJobName
       From QSYS2.Record_Lock_Info
       Where Table_Schema = :@Schema And Table_Name = :@Table 
             And Relative_Record_Number = :@RRN
@@ -108,12 +106,12 @@ End-Proc;
 //   Procedure: Get_ActiveJobInfo()
 // Description: Get job info data for a specific job name
 
-Dcl-Proc Get_ActiveJobInfo() Export;
+Dcl-Proc Get_ActiveJobInfo Export;
 
   Dcl-Pi *n;
     @JobName VarChar(28);      // In
     @JobInfo LikeDS(JobInfo);  // Out
-    @SQLCOD  Like(SQLCOD)      // Out
+    @SQLCOD  Like(SQLCOD);     // Out
   End-Pi;
 
   Exec SQL
@@ -126,7 +124,7 @@ Dcl-Proc Get_ActiveJobInfo() Export;
                                , Job_User_Filter   => '*ALL' ))
       Where Job_Name = :@JobName;
     // Return SQL Code
-    @SQLCOD = SQLCOD;
+  @SQLCOD = SQLCOD;
 
 End-Proc;
 
